@@ -29,7 +29,7 @@ namespace PortalRandkowy.API
         public void ConfigureServices(IServiceCollection services)
         { 
             // Rejestrujemy dbcontext/ Funkcja lambda (x)
-            services.AddDbContext<DataContext>(x => x.UseSqlite("Conectionstring"));
+            services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             // Było oryginalnie
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
