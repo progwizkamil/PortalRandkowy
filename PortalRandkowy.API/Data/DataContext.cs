@@ -9,6 +9,6 @@ namespace PortalRandkowy.API.Data
 
         // Dodajemy tabelę do bazy danych o nazwie Values (bo przechowuje wartości)
         public DbSet<Value> Values { get; set; }
-
+ 
     }
 }
