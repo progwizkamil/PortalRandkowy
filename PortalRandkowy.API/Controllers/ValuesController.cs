@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PortalRandkowy.API.Data;
 using PortalRandkowy.API.Models;
 
@@ -31,12 +32,12 @@ namespace PortalRandkowy.API.Controllers
         [HttpGet]
         //public ActionResult<IEnumerable<string>> Get()
         // Zmieniamy na IActionResult, bo zwracamy ok, a nie listę
-        public IActionResult GetValues()
+        public async Task<IActionResult> GetValues()
         {
             // throw new Exception("Generujemy wyjątek");
             //return new string[] { "value1", "value2" };
             // zwracamy wszystkie wartości
-            var values = this.context.Values.ToList();
+            var values = await this.context.Values.ToListAsync();
             // zwracamy status OK wraz ze wszystkimi wartościami
             return Ok(values);
         }
@@ -44,12 +45,12 @@ namespace PortalRandkowy.API.Controllers
         // GET api/values/5
         [HttpGet("{id}")]
         //public ActionResult<string> Get(int id)
-        public IActionResult GetValue(int id)
+        public async Task<IActionResult> GetValue(int id)
         {
             // zwracamy wartość po id, dlatego jest x.id, jeśli inaczej to trzeba zmienić x.id
             // Można zamiast First wybrać FirstOrDefault. Metoda First zwróci wyjątek jeśli nie znajdzie wartości. FirstOrDefault nie. Nie wiem tylko co zwróci jak nie znajdzie? NULL?
             // FirstOrDefault jednak zwróci "204 no content", Find zwraca też 204 no content, First zwróci "500 Internal Server Error" czyli niejasny komunikat.
-            var value = this.context.Values.FirstOrDefault(x => x.id == id);
+            var value = await this.context.Values.FirstOrDefaultAsync(x => x.id == id);
             // zwracamy status OK wraz ze wszystkimi wartościami
             return Ok(value);
         }
@@ -59,11 +60,11 @@ namespace PortalRandkowy.API.Controllers
         [HttpPost]
         //public void AddValue([FromBody] Value value)
         // Zamiast void dajemy sobie IActionResult, żeby móc zrobić status OK
-        public IActionResult AddValue([FromBody] Value value)
+        public async Task<IActionResult> AddValue([FromBody] Value value)
         {
             this.context.Values.Add(value);
             // Metoda, która zapisze nasze zmiany do bazy danych
-            this.context.SaveChanges();
+            await this.context.SaveChangesAsync();
             return Ok(value);
         }
 
@@ -72,15 +73,15 @@ namespace PortalRandkowy.API.Controllers
         [HttpPut("{id}")]
         //public void EditValue(int id, [FromBody] Value value)
         // Zamiast void dajemy sobie IActionResult, żeby móc zrobić status OK
-        public IActionResult EditValue(int id, [FromBody] Value value)
+        public async Task<IActionResult> EditValue(int id, [FromBody] Value value)
         {
             // Znajdujemy najpierw wartość o podanym id. Nie wiem czy metody find nie lepiej użyć powyżej dla GetValue? Zwróci nam prawidłowo nulla przecież, a nie wartość domyślną.
             // Nie lepiej, bo // FirstOrDefault jednak zwróci "204 no content", Find zwraca też 204 no content, First zwróci "500 Internal Server Error" czyli niejasny komunikat.
-            var data = this.context.Values.Find(id);
+            var data = await this.context.Values.FindAsync(id);
             //var oldData = data;
             data.Name = value.Name;
             this.context.Update(data);
-            this.context.SaveChanges();
+            await this.context.SaveChangesAsync();
             //return Ok("OldData: " + oldData + " NewData: " + data); <-- tak nie zadziała niestety, bo zwracać musi json, wypisze "data.value" zamiast json
             return Ok(data);
         }
@@ -89,16 +90,16 @@ namespace PortalRandkowy.API.Controllers
         [HttpDelete("{id}")]
         //public void DeleteValue(int id)
         // Zamiast void dajemy sobie IActionResult, żeby móc zrobić status OK
-        public IActionResult DeleteValue(int id)
+        public async Task<IActionResult> DeleteValue(int id)
         {
-            var data = this.context.Values.Find(id);
+            var data = await this.context.Values.FindAsync(id);
             //var oldData = data;
             // Zabezpieczenie przed zwróceniem Internal server error. Zwróci nam dzięki temu 204 No Content.
             if (data == null)
                 return NoContent();
 
             this.context.Remove(data);
-            this.context.SaveChanges();
+            await this.context.SaveChangesAsync();
             //return Ok("OldData: " + oldData + " NewData: " + data); <-- tak nie zadziała niestety, bo zwracać musi json, wypisze "data.value" zamiast json
             return Ok(data);
         }
